@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Symphonia Mobile</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #ffffff;
+      margin: 0;
+      padding: 0;
+      color: #000;
+    }
+    header {
+      text-align: center;
+      font-size: 32px;
+      color: #007BFF;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 12px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .search-bar {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    .search-bar input[type="text"] {
+      padding: 5px;
+      width: 80%;
+      max-width: 300px;
+    }
+    .search-bar button {
+      padding: 5px 10px;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      padding: 10px;
+    }
+    .song-card {
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 45%;
+      max-width: 160px;
+      padding: 5px;
+      text-align: center;
+      box-sizing: border-box;
+    }
+    .song-card img {
+      width: 100%;
+      height: auto;
+    }
+    .song-title {
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .song-artist {
+      font-size: 12px;
+      color: #666;
+    }
+    .play-button {
+      margin-top: 5px;
+      display: inline-block;
+      padding: 5px;
+      background-color: #007BFF;
+      color: #fff;
+      text-decoration: none;
+      font-size: 12px;
+      border: none;
+      cursor: pointer;
+    }
+    .pagination {
+      text-align: center;
+      margin: 10px 0;
+    }
+    .pagination a {
+      padding: 5px 10px;
+      margin: 0 2px;
+      background-color: #007BFF;
+      color: #fff;
+      text-decoration: none;
+      display: inline-block;
+    }
+    @media screen and (min-width: 600px) {
+      .song-card {
+        width: 22%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header><strong>Symphonia!</strong></header>
+  <div class="subtitle">Re-enabling access of internet music for symbian phones!</div>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search songs...">
+    <button onclick="performSearch()">Search</button>
+  </div>
+  <div class="grid" id="songsContainer"></div>
+  <div class="pagination" id="pagination"></div>
+
+  <script src="script.js"></script>
+  <script>
+    var songs = [];
+    var songsPerPage = 10;
+    var allSongs = [];
+
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return parseInt(urlParams.get(param)) || 1;
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function displaySongs(currentPage) {
+      const container = document.getElementById('songsContainer');
+      container.innerHTML = '';
+      const start = (currentPage - 1) * songsPerPage;
+      const end = start + songsPerPage;
+      const visibleSongs = songs.slice(start, end);
+
+      visibleSongs.forEach(song => {
+        const card = document.createElement('div');
+        card.className = 'song-card';
+        card.innerHTML = `
+          <img src="${song.cover}" alt="cover" onerror="this.onerror=null;this.src='default-cover.png';">
+          <div class="song-title">${song.title}</div>
+          <div class="song-artist">${song.artist}</div>
+          <a class="play-button" href="${song.url}" target="_blank">Play</a>
+        `;
+        container.appendChild(card);
+      });
+
+      updatePagination(currentPage);
+    }
+
+    function updatePagination(currentPage) {
+      const pageCount = Math.ceil(songs.length / songsPerPage);
+      const pagination = document.getElementById('pagination');
+      pagination.innerHTML = '';
+      const maxVisiblePages = 2;
+
+      for (let i = 1; i <= Math.min(pageCount, maxVisiblePages); i++) {
+        const link = document.createElement('a');
+        link.textContent = i;
+        link.href = `index.html?page=${i}`;
+        pagination.appendChild(link);
+      }
+
+      if (pageCount > maxVisiblePages) {
+        const nextLink = document.createElement('a');
+        nextLink.textContent = '→';
+        const nextPage = Math.min(currentPage + 1, pageCount);
+        nextLink.href = `index.html?page=${nextPage}`;
+        pagination.appendChild(nextLink);
+      }
+    }
+
+    function performSearch() {
+      const query = document.getElementById('searchInput').value;
+      if (query.trim() !== '') {
+        window.location.href = `search.html?q=${encodeURIComponent(query)}`;
+      }
+    }
+
+    window.onload = function () {
+      const currentPage = getQueryParam('page');
+      if (typeof musicDatabase !== 'undefined') {
+        allSongs = [...musicDatabase];
+        shuffle(allSongs);
+        songs = allSongs;
+        displaySongs(currentPage);
+      }
+    }
+  </script>
+</body>
+</html>
