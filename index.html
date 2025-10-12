@@ -39,22 +39,28 @@
       border: none;
       cursor: pointer;
     }
+    /* Use an inline-block grid for better alignment on older browsers */
     .grid {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
       padding: 10px;
+      /* prevent gaps caused by white-space between inline-blocks */
+      font-size: 0;
+      text-align: center;
     }
+    /* reset font-size for children */
+    .grid .song-card { font-size: 14px; }
     .song-card {
+      display: inline-block;
+      vertical-align: top;
       border: 1px solid #ccc;
       border-radius: 5px;
-      width: 45%;
-      max-width: 160px;
+      width: 120px; /* narrower tile for small covers */
       padding: 5px;
       text-align: center;
-      box-sizing: border-box;
+      margin: 5px;
+      background: #fff;
     }
+    /* ensure images don't stretch layout */
+    .song-card img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
     .song-card img {
       width: 100%;
       height: auto;
@@ -78,6 +84,7 @@
       border: none;
       cursor: pointer;
     }
+    /* no load button needed; covers load directly */
     .pagination {
       text-align: center;
       margin: 10px 0;
@@ -114,77 +121,101 @@
     var allSongs = [];
 
     function getQueryParam(param) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return parseInt(urlParams.get(param)) || 1;
+      var query = window.location.search;
+      if (!query) { return 1; }
+      query = query.substring(1); // remove '?'
+      var parts = query.split('&');
+      for (var i = 0; i < parts.length; i++) {
+        var pair = parts[i].split('=');
+        try {
+          if (decodeURIComponent(pair[0]) === param) {
+            var val = pair.length > 1 ? decodeURIComponent(pair[1]) : '';
+            var n = parseInt(val, 10);
+            return isNaN(n) ? 1 : n;
+          }
+        } catch (e) {
+          // ignore malformed encoding
+        }
+      }
+      return 1;
     }
 
     function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+      for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = array[i];
+        array[i] = array[j];
+        array[j] = tmp;
       }
     }
 
     function displaySongs(currentPage) {
-      const container = document.getElementById('songsContainer');
+      var container = document.getElementById('songsContainer');
       container.innerHTML = '';
-      const start = (currentPage - 1) * songsPerPage;
-      const end = start + songsPerPage;
-      const visibleSongs = songs.slice(start, end);
+      var start = (currentPage - 1) * songsPerPage;
+      var end = start + songsPerPage;
+      var visibleSongs = songs.slice(start, end);
 
-      visibleSongs.forEach(song => {
-        const card = document.createElement('div');
+      for (var i = 0; i < visibleSongs.length; i++) {
+        var song = visibleSongs[i];
+        var card = document.createElement('div');
         card.className = 'song-card';
-        card.innerHTML = `
-          <img src="${song.cover}" alt="cover" onerror="this.onerror=null;this.src='default-cover.png';">
-          <div class="song-title">${song.title}</div>
-          <div class="song-artist">${song.artist}</div>
-          <a class="play-button" href="${song.url}" target="_blank">Play</a>
-        `;
+  var coverSrc = song.cover || 'default-cover.png';
+  var imgHtml = '<img src="' + coverSrc + '" alt="cover" width="80" height="80" onerror="this.onerror=null;this.src=\'default-cover.png\';">';
+        var titleHtml = '<div class="song-title">' + (song.title || '') + '</div>';
+        var artistHtml = '<div class="song-artist">' + (song.artist || '') + '</div>';
+        var playHtml = '<a class="play-button" href="' + (song.url || '#') + '" target="_blank">Play</a>';
+        card.innerHTML = imgHtml + titleHtml + artistHtml + playHtml;
         container.appendChild(card);
-      });
+      }
 
       updatePagination(currentPage);
     }
 
     function updatePagination(currentPage) {
-      const pageCount = Math.ceil(songs.length / songsPerPage);
-      const pagination = document.getElementById('pagination');
+      var pageCount = Math.ceil(songs.length / songsPerPage);
+      var pagination = document.getElementById('pagination');
       pagination.innerHTML = '';
-      const maxVisiblePages = 2;
+      var maxVisiblePages = 2;
 
-      for (let i = 1; i <= Math.min(pageCount, maxVisiblePages); i++) {
-        const link = document.createElement('a');
-        link.textContent = i;
-        link.href = `index.html?page=${i}`;
+      var visible = pageCount < maxVisiblePages ? pageCount : maxVisiblePages;
+      for (var i = 1; i <= visible; i++) {
+        var link = document.createElement('a');
+        link.appendChild(document.createTextNode(i));
+        link.href = 'index.html?page=' + i;
         pagination.appendChild(link);
       }
 
       if (pageCount > maxVisiblePages) {
-        const nextLink = document.createElement('a');
-        nextLink.textContent = '→';
-        const nextPage = Math.min(currentPage + 1, pageCount);
-        nextLink.href = `index.html?page=${nextPage}`;
+        var nextLink = document.createElement('a');
+        nextLink.appendChild(document.createTextNode('\u2192'));
+        var nextPage = currentPage + 1;
+        if (nextPage > pageCount) { nextPage = pageCount; }
+        nextLink.href = 'index.html?page=' + nextPage;
         pagination.appendChild(nextLink);
       }
     }
 
     function performSearch() {
-      const query = document.getElementById('searchInput').value;
-      if (query.trim() !== '') {
-        window.location.href = `search.html?q=${encodeURIComponent(query)}`;
+      var query = document.getElementById('searchInput').value;
+      if (query && query.replace(/^\s+|\s+$/g, '') !== '') {
+        window.location.href = 'search.html?q=' + encodeURIComponent(query);
       }
     }
 
+    // images now load directly but are constrained to small size (120x120) with onerror fallback
+
     window.onload = function () {
-      const currentPage = getQueryParam('page');
+      var currentPage = getQueryParam('page');
       if (typeof musicDatabase !== 'undefined') {
-        allSongs = [...musicDatabase];
+        // copy array safely for older engines
+        allSongs = [];
+        for (var i = 0; i < musicDatabase.length; i++) { allSongs.push(musicDatabase[i]); }
         shuffle(allSongs);
         songs = allSongs;
         displaySongs(currentPage);
       }
-    }
+    };
   </script>
 </body>
 </html>

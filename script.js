@@ -2695,12 +2695,6 @@ var musicDatabase = [
             "url": "https://raw.github.com/anyosil/nmdmdb/main/music/YouCanWinIfYouWant.mp3"
         },
         {
-            "url": "https://raw.github.com/anyosil/nmdmdb/main/music/YoureMyHeartYoureMySoul.mp3"
-        },
-        {
-            "url": "https://raw.github.com/anyosil/nmdmdb/main/music/YoureMyHeartYoureMySoul98.mp3"
-        },
-        {
             "title": "Zinda Rahey",
             "artist": "A. R. Rahman",
             "album": "Chhaava (Original Motion Picture Soundtrack)",
