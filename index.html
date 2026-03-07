@@ -1,221 +1,417 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Symphonia Mobile</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: sans-serif;
-      background-color: #ffffff;
-      margin: 0;
-      padding: 0;
-      color: #000;
-    }
-    header {
-      text-align: center;
-      font-size: 32px;
-      color: #007BFF;
-    }
-    .subtitle {
-      text-align: center;
-      font-size: 12px;
-      color: #333;
-      margin-bottom: 10px;
-    }
-    .search-bar {
-      text-align: center;
-      margin-bottom: 15px;
-    }
-    .search-bar input[type="text"] {
-      padding: 5px;
-      width: 80%;
-      max-width: 300px;
-    }
-    .search-bar button {
-      padding: 5px 10px;
-      background-color: #007BFF;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-    }
-    /* Use an inline-block grid for better alignment on older browsers */
-    .grid {
-      padding: 10px;
-      /* prevent gaps caused by white-space between inline-blocks */
-      font-size: 0;
-      text-align: center;
-    }
-    /* reset font-size for children */
-    .grid .song-card { font-size: 14px; }
-    .song-card {
-      display: inline-block;
-      vertical-align: top;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      width: 120px; /* narrower tile for small covers */
-      padding: 5px;
-      text-align: center;
-      margin: 5px;
-      background: #fff;
-    }
-    /* ensure images don't stretch layout */
-    .song-card img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
-    .song-card img {
-      width: 100%;
-      height: auto;
-    }
-    .song-title {
-      font-size: 14px;
-      font-weight: bold;
-    }
-    .song-artist {
-      font-size: 12px;
-      color: #666;
-    }
-    .play-button {
-      margin-top: 5px;
-      display: inline-block;
-      padding: 5px;
-      background-color: #007BFF;
-      color: #fff;
-      text-decoration: none;
-      font-size: 12px;
-      border: none;
-      cursor: pointer;
-    }
-    /* no load button needed; covers load directly */
-    .pagination {
-      text-align: center;
-      margin: 10px 0;
-    }
-    .pagination a {
-      padding: 5px 10px;
-      margin: 0 2px;
-      background-color: #007BFF;
-      color: #fff;
-      text-decoration: none;
-      display: inline-block;
-    }
-    @media screen and (min-width: 600px) {
-      .song-card {
-        width: 22%;
-      }
-    }
-  </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nokia Music Store</title>
+    <style>
+        /* Classic Nokia Music Store UI */
+        body { font-family: sans-serif; margin: 0; padding: 0; background-color: #ffffff; color: #333; font-size: 13px; }
+        
+        /* Top Navigation */
+        .nav-links { text-align: center; padding: 4px; font-size: 11px; border-bottom: 1px solid #ccc; background-color: #f4f4f4; }
+        .nav-links a { color: #333; text-decoration: none; margin: 0 4px; }
+        .nav-links a:hover { text-decoration: underline; }
+        
+        /* Main Header */
+        .header { 
+            background-color: #666666; 
+            background-image: linear-gradient(to bottom, #888888, #555555); 
+            color: white; 
+            padding: 6px 8px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            border-bottom: 1px solid #333;
+        }
+        
+        /* Banner */
+        .banner-container { width: 100%; height: 110px; overflow: hidden; background-color: #000; display: block; }
+        .banner-img { width: 100%; min-height: 110px; border: none; }
+        
+        /* Search Area */
+        .search-area { padding: 5px; }
+        .search-table { width: 100%; border-collapse: collapse; }
+        .search-table td { padding: 2px; }
+        .search-input { width: 95%; padding: 4px; border: 1px solid #666; border-radius: 0; }
+        .search-btn { background-color: #0066CC; border: 1px solid #004499; color: white; padding: 4px 10px; font-weight: bold; font-size: 14px; cursor: pointer; }
+        
+        /* Section Headers */
+        .section-header { background-color: #e0e0e0; background-image: linear-gradient(to bottom, #eeeeee, #cccccc); padding: 4px 5px; font-weight: bold; font-size: 12px; border-top: 1px solid #ccc; border-bottom: 1px solid #999; margin-top: 5px; }
+        
+        /* Generic Views */
+        .view { display: none; }
+        .active-view { display: block; }
+        
+        /* Track List */
+        .track-list { margin: 0; padding: 0; list-style: none; }
+        .track-item { border-bottom: 1px solid #ccc; padding: 6px; overflow: hidden; }
+        .track-cover { float: left; width: 45px; height: 45px; margin-right: 8px; border: 1px solid #ccc; }
+        .track-info { float: left; width: 55%; }
+        .track-title { font-size: 13px; font-weight: bold; margin: 0 0 2px 0; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-artist { font-size: 11px; color: #666; margin: 0; }
+        .play-btn { float: right; background-color: #FFCC00; color: #333; border: 1px solid #cc9900; text-decoration: none; padding: 6px 10px; font-size: 11px; font-weight: bold; margin-top: 8px; cursor: pointer; }
+        
+        /* Pagination Controls */
+        .pagination { text-align: center; padding: 10px; display: none; }
+        .btn-page { background-color: #e0e0e0; border: 1px solid #999; color: #333; padding: 8px 15px; font-weight: bold; cursor: pointer; margin: 0 5px; }
+        
+        /* Forms */
+        .form-container { padding: 10px; }
+        .form-container input { width: 90%; padding: 6px; margin-bottom: 10px; border: 1px solid #666; }
+        .btn-main { background-color: #0066CC; color: white; border: none; padding: 8px; width: 100%; font-weight: bold; margin-bottom: 10px; cursor: pointer; }
+        .link-btn { background: none; border: none; color: #0066CC; text-decoration: underline; font-size: 12px; cursor: pointer; padding: 0; }
+        .msg { font-size: 12px; color: #cc0000; margin-bottom: 10px; font-weight: bold; }
+        
+        /* Genres */
+        .genres-table { width: 100%; text-align: left; font-size: 12px; padding: 5px; }
+        .genres-table a { color: #333; text-decoration: underline; }
+    </style>
 </head>
 <body>
-  <header><strong>Symphonia!</strong></header>
-  <div class="subtitle">Re-enabling access of internet music for symbian phones!</div>
-  <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="Search songs...">
-    <button onclick="performSearch()">Search</button>
-  </div>
-  <div class="grid" id="songsContainer"></div>
-  <div class="pagination" id="pagination"></div>
 
-  <script src="script.js"></script>
-  <script>
-    var songs = [];
-    var songsPerPage = 10;
-    var allSongs = [];
+    <div class="nav-links">
+        <span id="nav-auth-area">
+            <a href="#" onclick="switchView('login-view')">Sign In</a> | 
+            <a href="#" onclick="switchView('register-view')">Join now</a>
+        </span> | 
+        <a href="#">Help</a> | 
+        <a href="#" onclick="switchView('home-view')">Home</a>
+    </div>
 
-    function getQueryParam(param) {
-      var query = window.location.search;
-      if (!query) { return 1; }
-      query = query.substring(1); // remove '?'
-      var parts = query.split('&');
-      for (var i = 0; i < parts.length; i++) {
-        var pair = parts[i].split('=');
-        try {
-          if (decodeURIComponent(pair[0]) === param) {
-            var val = pair.length > 1 ? decodeURIComponent(pair[1]) : '';
-            var n = parseInt(val, 10);
-            return isNaN(n) ? 1 : n;
-          }
-        } catch (e) {
-          // ignore malformed encoding
+    <div class="header">Nokia Music Store</div>
+
+    <div id="home-view" class="view active-view">
+        
+        <div class="banner-container">
+            <img class="banner-img" src="nuvi_banner.png" alt="Banner">
+        </div>
+
+        <div class="search-area">
+            <table class="search-table">
+                <tr>
+                    <td><input type="text" id="search-artist" class="search-input" placeholder="Artist"></td>
+                    <td><input type="text" id="search-title" class="search-input" placeholder="Title"></td>
+                    <td style="width:1%;"><button class="search-btn" onclick="executeSearch()">🔍</button></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="section-header">Genres</div>
+        <table class="genres-table">
+            <tr>
+                <td><a href="#">Dance</a></td>
+                <td><a href="#">Rock</a></td>
+                <td><a href="#">Blues</a></td>
+            </tr>
+            <tr>
+                <td><a href="#">Pop</a></td>
+                <td><a href="#">Rap/Hip Hop</a></td>
+                <td><a href="#">Jazz</a></td>
+            </tr>
+        </table>
+        
+        <div class="section-header" id="discover-header">Discover</div>
+        <div id="loading" style="padding:10px; font-size:12px;">Loading music library...</div>
+        
+        <ul id="track-container" class="track-list"></ul>
+        
+        <div id="pagination-controls" class="pagination">
+            <button id="btn-prev" class="btn-page" onclick="changePage(-1)">Back</button>
+            <span id="page-indicator" style="font-size:11px; font-weight:bold; margin:0 5px;"></span>
+            <button id="btn-next" class="btn-page" onclick="changePage(1)">More</button>
+        </div>
+    </div>
+
+    <div id="login-view" class="view form-container">
+        <div class="section-header" style="margin-top:0;">Sign In</div>
+        <br>
+        <input type="text" id="log-user" placeholder="Username">
+        <input type="password" id="log-pass" placeholder="Password">
+        <button class="btn-main" onclick="processLogin()">Log In</button>
+        <p id="login-msg" class="msg"></p>
+        <br>
+        <button class="link-btn" onclick="switchView('register-view')">Don't have a Nuvi Account? Create One!</button>
+    </div>
+
+    <div id="register-view" class="view form-container">
+        <div class="section-header" style="margin-top:0;">Join Now</div>
+        <br>
+        <input type="text" id="reg-user" placeholder="Choose a Username">
+        <input type="text" id="reg-email" placeholder="Email Address">
+        <input type="password" id="reg-pass" placeholder="Choose a Password">
+        <button class="btn-main" onclick="processRegister()">Create Nuvi Account</button>
+        <p id="reg-msg" class="msg"></p>
+        <br>
+        <button class="link-btn" onclick="switchView('login-view')">Already have an account? Sign In.</button>
+    </div>
+
+    <script>
+        // --- GLOBALS ---
+        var globalTracks = [];
+        var currentShuffle = []; // Stores the randomized array
+        var currentUser = null;
+        
+        // Pagination Variables
+        var currentPage = 0;
+        var tracksPerPage = 30;
+        
+        // JSONBin Configuration
+        var BIN_ID = "67ca7dcaad19ca34f817f025";
+        var MASTER_KEY = "$2a$10$IG0fCGUHCL7iFsZMFQjI4e4ufPung048BrnWjddZBoo5V3UjUQ4ja";
+        var BIN_URL = "https://api.jsonbin.io/v3/b/" + BIN_ID;
+
+        // --- CORE NAVIGATION ---
+        window.onload = function() {
+            loadDatabase();
+        };
+
+        function switchView(viewId) {
+            document.getElementById('home-view').style.display = 'none';
+            document.getElementById('login-view').style.display = 'none';
+            document.getElementById('register-view').style.display = 'none';
+            document.getElementById(viewId).style.display = 'block';
+            
+            document.getElementById('login-msg').innerHTML = "";
+            document.getElementById('reg-msg').innerHTML = "";
+            
+            // If returning home, make sure pagination controls are visible
+            if (viewId === 'home-view' && currentShuffle.length > 0) {
+                document.getElementById('pagination-controls').style.display = 'block';
+                document.getElementById('discover-header').scrollIntoView();
+            }
         }
-      }
-      return 1;
-    }
 
-    function shuffle(array) {
-      for (var i = array.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var tmp = array[i];
-        array[i] = array[j];
-        array[j] = tmp;
-      }
-    }
+        // --- MUSIC & PAGINATION LOGIC ---
+        function loadDatabase() {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    document.getElementById('loading').style.display = 'none';
+                    try {
+                        globalTracks = JSON.parse(xhr.responseText);
+                    } catch(e) {
+                        globalTracks = eval('(' + xhr.responseText + ')');
+                    }
+                    renderShuffleHome();
+                }
+            };
+            xhr.open("GET", "database.json", true);
+            xhr.setRequestHeader("Cache-Control", "no-cache");
+            xhr.send();
+        }
 
-    function displaySongs(currentPage) {
-      var container = document.getElementById('songsContainer');
-      container.innerHTML = '';
-      var start = (currentPage - 1) * songsPerPage;
-      var end = start + songsPerPage;
-      var visibleSongs = songs.slice(start, end);
+        function renderShuffleHome() {
+            // Shuffle once on load
+            currentShuffle = globalTracks.slice(0); 
+            for (var i = currentShuffle.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = currentShuffle[i];
+                currentShuffle[i] = currentShuffle[j];
+                currentShuffle[j] = temp;
+            }
+            currentPage = 0;
+            displayPage();
+        }
 
-      for (var i = 0; i < visibleSongs.length; i++) {
-        var song = visibleSongs[i];
-        var card = document.createElement('div');
-        card.className = 'song-card';
-  var coverSrc = song.cover || 'default-cover.png';
-  var imgHtml = '<img src="' + coverSrc + '" alt="cover" width="80" height="80" onerror="this.onerror=null;this.src=\'default-cover.png\';">';
-        var titleHtml = '<div class="song-title">' + (song.title || '') + '</div>';
-        var artistHtml = '<div class="song-artist">' + (song.artist || '') + '</div>';
-        var playHtml = '<a class="play-button" href="' + (song.url || '#') + '" target="_blank">Play</a>';
-        card.innerHTML = imgHtml + titleHtml + artistHtml + playHtml;
-        container.appendChild(card);
-      }
+        function displayPage() {
+            var startIndex = currentPage * tracksPerPage;
+            var endIndex = startIndex + tracksPerPage;
+            var pageTracks = currentShuffle.slice(startIndex, endIndex);
+            
+            renderTracks(pageTracks, 'track-container');
+            
+            // Handle Pagination Buttons
+            var paginationDiv = document.getElementById('pagination-controls');
+            var btnPrev = document.getElementById('btn-prev');
+            var btnNext = document.getElementById('btn-next');
+            var indicator = document.getElementById('page-indicator');
+            
+            paginationDiv.style.display = 'block';
+            
+            // Show/Hide Previous Button
+            if (currentPage === 0) {
+                btnPrev.style.display = 'none';
+            } else {
+                btnPrev.style.display = 'inline-block';
+            }
+            
+            // Show/Hide Next Button
+            if (endIndex >= currentShuffle.length) {
+                btnNext.style.display = 'none';
+            } else {
+                btnNext.style.display = 'inline-block';
+            }
+            
+            // Update Page Indicator text
+            var maxPages = Math.ceil(currentShuffle.length / tracksPerPage);
+            indicator.innerHTML = (currentPage + 1) + "/" + maxPages;
+        }
 
-      updatePagination(currentPage);
-    }
+        function changePage(direction) {
+            currentPage += direction;
+            displayPage();
+            // Scroll back up to the top of the list so the user doesn't have to scroll up manually
+            document.getElementById('discover-header').scrollIntoView();
+        }
 
-    function updatePagination(currentPage) {
-      var pageCount = Math.ceil(songs.length / songsPerPage);
-      var pagination = document.getElementById('pagination');
-      pagination.innerHTML = '';
-      var maxVisiblePages = 2;
+        function renderTracks(tracksArray, containerId) {
+            var container = document.getElementById(containerId);
+            var html = "";
+            for (var i = 0; i < tracksArray.length; i++) {
+                var t = tracksArray[i];
+                html += '<li class="track-item">';
+                html += '<img class="track-cover" src="' + t.cover + '" alt="cover">';
+                html += '<div class="track-info">';
+                html += '<p class="track-title">' + t.title + '</p>';
+                html += '<p class="track-artist">' + t.artist + '</p>';
+                html += '</div>';
+                html += '<a class="play-btn" href="' + t.url + '" onclick="return attemptPlay(event)">Play</a>';
+                html += '</li>';
+            }
+            container.innerHTML = html;
+        }
 
-      var visible = pageCount < maxVisiblePages ? pageCount : maxVisiblePages;
-      for (var i = 1; i <= visible; i++) {
-        var link = document.createElement('a');
-        link.appendChild(document.createTextNode(i));
-        link.href = 'index.html?page=' + i;
-        pagination.appendChild(link);
-      }
+        function attemptPlay(e) {
+            if (!currentUser) {
+                if (e && e.preventDefault) { e.preventDefault(); }
+                alert("Nuvi Account required. Please sign in to download or play music.");
+                switchView('login-view');
+                return false; 
+            }
+            return true; 
+        }
 
-      if (pageCount > maxVisiblePages) {
-        var nextLink = document.createElement('a');
-        nextLink.appendChild(document.createTextNode('\u2192'));
-        var nextPage = currentPage + 1;
-        if (nextPage > pageCount) { nextPage = pageCount; }
-        nextLink.href = 'index.html?page=' + nextPage;
-        pagination.appendChild(nextLink);
-      }
-    }
+        function executeSearch() {
+            var artistQ = document.getElementById('search-artist').value.toLowerCase();
+            var titleQ = document.getElementById('search-title').value.toLowerCase();
+            
+            if (artistQ === "" && titleQ === "") return;
 
-    function performSearch() {
-      var query = document.getElementById('searchInput').value;
-      if (query && query.replace(/^\s+|\s+$/g, '') !== '') {
-        window.location.href = 'search.html?q=' + encodeURIComponent(query);
-      }
-    }
+            var results = [];
+            for (var i = 0; i < globalTracks.length; i++) {
+                var track = globalTracks[i];
+                var aMatch = artistQ === "" || track.artist.toLowerCase().indexOf(artistQ) !== -1;
+                var tMatch = titleQ === "" || track.title.toLowerCase().indexOf(titleQ) !== -1;
+                
+                if (aMatch && tMatch) {
+                    results.push(track);
+                }
+            }
+            
+            // Hide pagination when viewing search results to prevent confusion
+            document.getElementById('pagination-controls').style.display = 'none';
+            document.getElementById('discover-header').innerHTML = "Search Results";
+            
+            // For search, we still limit to 30 to prevent crashes, but don't paginate yet to keep it simple
+            renderTracks(results.slice(0, 30), 'track-container');
+        }
 
-    // images now load directly but are constrained to small size (120x120) with onerror fallback
+        // --- ACCOUNT/JSONBIN LOGIC ---
 
-    window.onload = function () {
-      var currentPage = getQueryParam('page');
-      if (typeof musicDatabase !== 'undefined') {
-        // copy array safely for older engines
-        allSongs = [];
-        for (var i = 0; i < musicDatabase.length; i++) { allSongs.push(musicDatabase[i]); }
-        shuffle(allSongs);
-        songs = allSongs;
-        displaySongs(currentPage);
-      }
-    };
-  </script>
+        function processRegister() {
+            var user = document.getElementById('reg-user').value.toLowerCase(); 
+            var email = document.getElementById('reg-email').value;
+            var pass = document.getElementById('reg-pass').value;
+            var msgBox = document.getElementById('reg-msg');
+
+            if (user.length < 3 || pass.length < 3) {
+                msgBox.innerHTML = "Username and password must be at least 3 chars.";
+                return;
+            }
+
+            msgBox.innerHTML = "Connecting to database...";
+
+            var req = new XMLHttpRequest();
+            req.onreadystatechange = function() {
+                if (req.readyState == 4) {
+                    if (req.status == 200) {
+                        var data = JSON.parse(req.responseText);
+                        var users = data.record.users || {}; 
+                        
+                        if (users[user]) {
+                            msgBox.innerHTML = "Username already taken.";
+                            return;
+                        }
+
+                        users[user] = { 
+                            "email": email,
+                            "password": pass 
+                        };
+                        
+                        var newData = { "users": users };
+
+                        var putReq = new XMLHttpRequest();
+                        putReq.onreadystatechange = function() {
+                            if (putReq.readyState == 4 && putReq.status == 200) {
+                                msgBox.innerHTML = "Account created! You can now sign in.";
+                                document.getElementById('reg-user').value = "";
+                                document.getElementById('reg-email').value = "";
+                                document.getElementById('reg-pass').value = "";
+                                setTimeout(function() { switchView('login-view'); }, 1500);
+                            }
+                        };
+                        putReq.open("PUT", BIN_URL, true);
+                        putReq.setRequestHeader("Content-Type", "application/json");
+                        putReq.setRequestHeader("X-Master-Key", MASTER_KEY);
+                        putReq.send(JSON.stringify(newData));
+                        
+                    } else {
+                        msgBox.innerHTML = "Network error. Try again.";
+                    }
+                }
+            };
+            req.open("GET", BIN_URL + "/latest", true);
+            req.setRequestHeader("X-Master-Key", MASTER_KEY);
+            req.send();
+        }
+
+        function processLogin() {
+            var user = document.getElementById('log-user').value.toLowerCase();
+            var pass = document.getElementById('log-pass').value;
+            var msgBox = document.getElementById('login-msg');
+
+            if (user === "" || pass === "") {
+                msgBox.innerHTML = "Enter username and password.";
+                return;
+            }
+
+            msgBox.innerHTML = "Verifying...";
+
+            var req = new XMLHttpRequest();
+            req.onreadystatechange = function() {
+                if (req.readyState == 4) {
+                    if (req.status == 200) {
+                        var data = JSON.parse(req.responseText);
+                        var users = data.record.users || {};
+
+                        if (users[user] && users[user].password === pass) {
+                            currentUser = user;
+                            
+                            var authArea = document.getElementById('nav-auth-area');
+                            authArea.innerHTML = '<span style="color:#0066CC; font-weight:bold;">Hi, ' + currentUser + '</span> | <a href="#" onclick="logout()">Sign Out</a>';
+                            
+                            switchView('home-view');
+                            document.getElementById('log-pass').value = ""; 
+                        } else {
+                            msgBox.innerHTML = "Invalid username or password.";
+                        }
+                    } else {
+                        msgBox.innerHTML = "Network error. Try again.";
+                    }
+                }
+            };
+            req.open("GET", BIN_URL + "/latest", true);
+            req.setRequestHeader("X-Master-Key", MASTER_KEY);
+            req.send();
+        }
+
+        function logout() {
+            currentUser = null;
+            var authArea = document.getElementById('nav-auth-area');
+            authArea.innerHTML = '<a href="#" onclick="switchView(\'login-view\')">Sign In</a> | <a href="#" onclick="switchView(\'register-view\')">Join now</a>';
+            switchView('login-view');
+        }
+    </script>
+
 </body>
 </html>
